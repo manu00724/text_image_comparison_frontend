@@ -17,4 +17,17 @@ export function ClauseCard({ clause, onSelect }) {
     {clause.filename && <p className="mt-3 flex items-center gap-1.5 border-t border-slate-100 pt-3 text-[11px] text-slate-400"><FileText className="h-3.5 w-3.5" />{clause.filename}</p>}
   </article>;
 }
-function Detail({ label, value }) { return value ? <div><dt className="font-semibold text-slate-500">{label}</dt><dd className="text-slate-600">{value}</dd></div> : null; }
+function formatDetail(value) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value !== 'string') {
+    try { return JSON.stringify(value, null, 2); }
+    catch { return String(value); }
+  }
+  const fenced = value.trim().match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  const candidate = fenced ? fenced[1] : value;
+  try {
+    const parsed = JSON.parse(candidate);
+    return typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2);
+  } catch { return value; }
+}
+function Detail({ label, value }) { const formatted = formatDetail(value); return formatted ? <div><dt className="font-semibold text-slate-500">{label}</dt><dd className="whitespace-pre-wrap break-words text-slate-600">{formatted}</dd></div> : null; }
